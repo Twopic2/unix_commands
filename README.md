@@ -13,6 +13,9 @@ This project is just to get me fimilar with Golang and the wonderful uses it has
 1. Ping
    
 ~2. TraceRoute~
+
 3. DIG
+
 4. iwconfig
+
 5. hostname
