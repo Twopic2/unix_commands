@@ -88,7 +88,7 @@ func waitResponses(c *icmp.PacketConn, timeout time.Duration, _ time.Time, targe
 func instruction() {
 	fmt.Println("Welcome to FemboyTace!\n", "(✿^‿^)")
 	fmt.Println("Here's a basic tutorial!\n", "./femboytrace -target=`8.8.8.8` -maxTTL=20 -icmpHop=2 -times=2")
-	fmt.Println("Compiler flags!\n", "-target = ip address you want to point at", "-highTTL set amount of TTL", "-icmpHop number of ICMP packets each hop", "-times Time it takes to respond")
+	fmt.Println("Compiler flags!\n", "-target = ip address you want to point at\n", "-highTTL set amount of TTL\n", "-icmpHop number of ICMP packets each hop\n", "-times Time it takes to respond")
 
 }
 
