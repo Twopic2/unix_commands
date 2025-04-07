@@ -45,7 +45,7 @@ func syncFile(ctx context.Context, wg *sync.WaitGroup, serverAddr string, file s
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		log.Printf("[OK] Synced %s → %s with MD5 %s\n", file, remote, md5sum)
+		log.Printf("Synced %s → %s with MD5 %s\n", file, remote, md5sum)
 	}
 }
 
