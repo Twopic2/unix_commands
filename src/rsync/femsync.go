@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
 	"sync"
 )
 
@@ -29,23 +30,46 @@ func computeMD5(path string) (string, error) {
 	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
-func syncFile(ctx context.Context, wg *sync.WaitGroup, serverAddr string, file string, dest string) {
+func firstLogin() {
+
+	home, err := os.UserHomeDir()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	configPath := filepath.Join(home, ".femsync_first_run")
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		fmt.Println("It looks like this is your first time using the tool.")
+		fmt.Println("Make sure the rsync/SSH daemon is configured and accessible via SSH on the remote server.")
+		fmt.Println("You can use the -src, -host, and -dest flags to specify your backup source and destination.")
+
+		file, err := os.Create(configPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+	}
+
+}
+
+func syncFile(ctx context.Context, wg *sync.WaitGroup, remoteHost string, file string, dest string) {
 	defer wg.Done()
 
-	remote := fmt.Sprintf("%s:%s", serverAddr, dest)
-	cmd := exec.CommandContext(ctx, "rsync", "-avz", "-e", "ssh", file, remote)
+	destPath := fmt.Sprintf("%s:%s", remoteHost, dest)
+	cmd := exec.CommandContext(ctx, "rsync", "-az", "-e", "ssh", file, destPath)
 
-	out, err := cmd.CombinedOutput()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("[ERROR] rsync failed for %s: %v\nOutput: %s\n", file, err, string(out))
+		log.Printf("[ERROR] rsync failed for %s: %v\nOutput: %s", file, err, output)
 		return
 	}
 
 	md5sum, err := computeMD5(file)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("[ERROR] Computing MD5 for %s: %v\n", file, err)
 	} else {
-		log.Printf("Synced %s → %s with MD5 %s\n", file, remote, md5sum)
+		log.Printf("[OK] Synced %s → %s with MD5 %s\n", file, destPath, md5sum)
 	}
 }
 
@@ -62,6 +86,8 @@ func main() {
 	flag.StringVar(&serverAddr, "server", "user@remote", "Remote SSH server (user@host)")
 	flag.StringVar(&destPath, "destination", "/backup", "Destination path on remote")
 	flag.Parse()
+
+	firstLogin()
 
 	var wg sync.WaitGroup
 	ctx := context.Background()
