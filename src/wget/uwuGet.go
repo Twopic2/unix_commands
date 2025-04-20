@@ -19,6 +19,10 @@ type progressWriter struct {
 	Bytes  int64
 }
 
+var (
+	urlPtr = flag.String("url", "", "URL to download")
+)
+
 func downloadFile(url string) error {
 	fileName := path.Base(url)
 
@@ -66,7 +70,7 @@ func (pw *progressWriter) printProgress() {
 }
 
 func main() {
-	urlPtr := flag.String("url", "", "URL to download")
+
 	flag.Parse()
 
 	fmt.Print("Welcome to uwuGet!\n")
